@@ -10,9 +10,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 1em;
         }
-        .description {
-            max-width: 600px;
-        }
         .line::before {
             content: " ";
             display: inline-block;
@@ -43,6 +40,7 @@
         }
         textarea {
             width: 100%;
+            height: 100px;
             box-sizing: border-box;
             font-family: monospace;
         }
@@ -60,7 +58,6 @@
             margin-top: 2em;
             margin-bottom: 1em;
         }
-
         /* dark mode is trendy */
         @media (prefers-color-scheme: dark) {
             body {
@@ -77,56 +74,60 @@
     </style>
 </head>
 <body>
-    <h2>Go template validation</h2>
-    <section class="description">
+<h2>Go template validation</h2>
+<section class="description">
+    <p>
+        When working with the <code><a href="https://golang.org/pkg/text/template/">"text/template"</a></code> and
+        <code><a href="https://golang.org/pkg/html/template/">"html/template"</a></code> packages, I often have a hard
+        time understanding go's errors, especially when they're inline in code. This is a simple tool to visually
+        show where validation errors are happening.
+    </p>
+    <p>每当用 <code><a href="https://golang.org/pkg/text/template/">"text/template"</a></code> 及
+        <code><a href="https://golang.org/pkg/html/template/">"html/template"</a></code> 时，皆困于其错，尤以其内置为甚。此小工具，聊以慰藉！
+    </p>
+    <p>
+        To use, choose a file or insert your template code directly. You can add mock data in the form of JSON.
+    </p>
+</section>
+<details open>
+    <summary><h3>Input</h3></summary>
+    <form method="POST" enctype="multipart/form-data">
         <p>
-            When working with the <code><a href="https://golang.org/pkg/text/template/">"text/template"</a></code> and
-            <code><a href="https://golang.org/pkg/html/template/">"html/template"</a></code> packages, I often have a hard
-            time understanding go's errors, especially when they're inline in code. This is a simple tool to visually
-            show where validation errors are happening.
+            <label for="from-file">Upload file</label>
+            <input type="file" name="from-file" id="from-file"/>
         </p>
         <p>
-            To use, choose a file or insert your template code directly. You can add mock data in the form of JSON.
+            <label for="from-raw-text">Template</label>
+            <textarea wrap="off" name="from-raw-text" id="from-raw-text" placeholder="The bot says {{" {{"}}.Value{{"}}"}}">{{.RawText}}</textarea>
         </p>
-    </section>
-    <details open>
-        <summary><h3>Input</h3></summary>
-        <form method="POST" enctype="multipart/form-data">
-            <p>
-                <label for="from-file">Upload file</label>
-                <input type="file" name="from-file" id="from-file" />
-            </p>
-            <p>
-                <label for="from-raw-text">Template</label>
-                <textarea wrap="off" name="from-raw-text" id="from-raw-text" placeholder="The bot says {{"{{"}}.Value{{"}}"}}">{{.RawText}}</textarea>
-            </p>
-            <p>
-                <label for="data">Data (json)</label>
-                <textarea wrap="off" name="data" id="data" placeholder='{"Value": "hello world"}'>{{.RawData}}</textarea>
-            </p>
-            <p>
-                <label for="functions">Function names (comma separated list)</label>
-                <input type="text" name="functions" id="functions" value="{{.RawFunctions}}" />
-            </p>
-            <p>
-                <button type="submit">Submit</button>
-            </p>
-        </form>
-    </details>
-    {{if .RawText -}}
-    <details open>
-        <summary><h3>Results</h3></summary>
-        {{if not (len .Errors) -}}
-        <p>No errors found</p>
-        {{- else -}}
-        <p>{{len .Errors}} error{{if ne (len .Errors) 1}}s{{end}} found</p>
-        {{- end}}
-        {{range $ei, $e := $.Errors -}}
-            {{if eq $e.Line -1 -}}<p class="error">{{$e.Description}} [{{$e.Level}}]</p>{{- end}}
-        {{- end}}
-        <pre>
+        <p>
+            <label for="data">Data (JSON)</label>
+            <textarea wrap="off" name="data" id="data" placeholder='{"Value": "hello world"}'>{{.RawData}}</textarea>
+        </p>
+        <p>
+            <label for="functions">Function names (comma separated list)</label>
+            <input type="text" name="functions" id="functions" value="{{.RawFunctions}}"/>
+        </p>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+</details>
+{{if .RawText -}}
+<details open>
+    <summary><h3>Results</h3></summary>
+    {{if not (len .Errors) -}}
+    <p>No errors found. 一切完好！</p>
+    {{- else -}}
+    <p>{{len .Errors}} 哦有错了！error{{if ne (len .Errors) 1}}s{{end}} found</p>
+    {{- end}}
+    {{range $ei, $e := $.Errors -}}
+    {{if eq $e.Line -1 -}}<p class="error">{{$e.Description}} [{{$e.Level}}]</p>{{- end}}
+    {{- end}}
+    <pre>
             {{- range $i, $l := .TextLines -}}
-            <span class="line{{- range $ei, $e := $.Errors}}{{if eq $i $e.Line}} with-error{{end}}{{end}}" data-line-no="{{$i}}">
+            <span class="line{{- range $ei, $e := $.Errors}}{{if eq $i $e.Line}} with-error{{end}}{{end}}"
+                  data-line-no="{{$i}}">
                 {{- $l -}}
             </span>{{nl}}
             {{- range $ei, $e := $.Errors -}}
@@ -144,14 +145,16 @@
             {{- end -}}
             {{- end -}}
         </pre>
-    </details>
-    {{- end}}
-    {{if .Output -}}
-    <details>
-        <summary><h3>Output</h3></summary>
-        <pre>{{- .Output -}}</pre>
-    </details>
-    {{- end}}
-    <footer>Made by <a href="https://camlittle.com">Cameron Little</a>. Contribute on <a href="https://github.com/apexskier/go-template-validation">GitHub</a>.</footer>
+</details>
+{{- end}}
+{{if .Output -}}
+<details open>
+    <summary><h3>Output</h3></summary>
+    <pre>{{- .Output -}}</pre>
+</details>
+{{- end}}
+<footer>Made by <a href="https://camlittle.com">Cameron Little</a>. Contribute on <a
+        href="https://github.com/apexskier/go-template-validation">GitHub</a>.
+</footer>
 </body>
 </html>
