@@ -1,5 +1,9 @@
 # Go template validation
 
+![img.png](_docs/img.png)
+
+![img_1.png](_docs/img_1.png)
+
 When working with the [`"text/template"`](https://golang.org/pkg/text/template/) and [`"html/template"`](https://golang.org/pkg/html/template/) packages, I often have a hard time understanding go's errors, especially when they're inline in code. This is a simple tool to visually show where validation errors are happening.
 
 To use, choose a file or insert your template code directly. You can add mock data in the form of JSON.
